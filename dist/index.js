@@ -695,6 +695,11 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function fail(message) {
+  logger.error(message);
+  process.exit(1);
+}
+
 module.exports = {
   ClientError,
   TimeoutError,
@@ -703,7 +708,8 @@ module.exports = {
   tmpdir,
   inspect,
   retry,
-  sleep
+  sleep,
+  fail
 };
 
 
@@ -908,7 +914,7 @@ module.exports = {
 
 const resolvePath = __nccwpck_require__(2983);
 
-const { logger, retry } = __nccwpck_require__(6979);
+const { logger, retry, fail } = __nccwpck_require__(6979);
 
 const MAYBE_READY = ["clean", "has_hooks", "unknown", "unstable"];
 const NOT_READY = ["dirty", "draft"];
@@ -1150,7 +1156,7 @@ function waitUntilReady(pullRequest, context) {
       const pr = await getPullRequest(octokit, pullRequest);
       return checkReady(pr, context);
     },
-    () => logger.info(`PR not ready to be merged after ${mergeRetries} tries`)
+    () => fail(`PR not ready to be merged after ${mergeRetries} tries`)
   );
 }
 
@@ -1215,7 +1221,7 @@ function tryMerge(
         commitMessage
       );
     },
-    () => logger.info(`PR could not be merged after ${mergeRetries} tries`)
+    () => fail(`PR could not be merged after ${mergeRetries} tries`)
   );
 }
 
